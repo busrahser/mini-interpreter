@@ -1,0 +1,73 @@
+# exceptions.mini
+# Demonstrates: Exception Handling (elective), Functions, Scope
+#
+# try/catch works like most languages: if a throw is executed inside the
+# try block (at any depth), control jumps to the catch handler.  The thrown
+# value is bound to the catch variable in a new local scope.
+
+# Basic throw / catch
+try {
+    throw "something went wrong"
+} catch(e) {
+    print("Caught: " + e)
+}
+
+# Error propagation through function calls
+fun risky(x) {
+    if x < 0 {
+        throw "negative input: " + str(x)
+    }
+    return x * 2
+}
+
+fun safe_double(x) {
+    try {
+        return risky(x)
+    } catch(err) {
+        print("safe_double caught: " + err)
+        return 0
+    }
+}
+
+print(safe_double(5))    # 10
+print(safe_double(-3))   # safe_double caught: negative input: -3  →  0
+
+# Nested try/catch — inner catch handles its own errors; outer handles the rest
+fun divide(a, b) {
+    if b == 0 {
+        throw "division by zero"
+    }
+    return a / b
+}
+
+try {
+    let x = divide(10, 2)
+    print("10 / 2 = " + str(x))   # 10 / 2 = 5
+
+    try {
+        let y = divide(5, 0)
+        print("should not reach here")
+    } catch(inner_err) {
+        print("Inner catch: " + inner_err)   # Inner catch: division by zero
+    }
+
+    print("Continuing after inner try/catch")
+} catch(outer_err) {
+    print("Outer catch: " + outer_err)   # should not trigger
+}
+
+# Throwing and catching objects (struct instances)
+struct AppError { code, message }
+
+fun validate_age(age) {
+    if age < 0 or age > 150 {
+        throw new AppError(400, "Invalid age: " + str(age))
+    }
+    return true
+}
+
+try {
+    validate_age(200)
+} catch(err) {
+    print("Error " + str(err.code) + ": " + err.message)
+}

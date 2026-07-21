@@ -1,0 +1,34 @@
+# fibonacci.mini
+# Demonstrates: Recursion (elective), Functions, Scope
+#
+# fib() calls itself twice — the interpreter creates a new scope frame for
+# each call, so local variables in each frame are independent.
+# This is the classic textbook example of tree recursion.
+
+fun fib(n) {
+    if n <= 1 {
+        return n
+    }
+    return fib(n - 1) + fib(n - 2)
+}
+
+# Print first 10 Fibonacci numbers using a while loop
+let i = 0
+while i < 10 {
+    print("fib(" + str(i) + ") = " + str(fib(i)))
+    i = i + 1
+}
+
+# Verify a specific value
+let result = fib(10)
+print("fib(10) = " + str(result))
+
+# Recursive sum 1..n
+fun sum_to(n) {
+    if n <= 0 {
+        return 0
+    }
+    return n + sum_to(n - 1)
+}
+
+print("sum 1..10 = " + str(sum_to(10)))

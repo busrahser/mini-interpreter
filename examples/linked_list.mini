@@ -1,0 +1,86 @@
+# linked_list.mini
+# Demonstrates: User-defined Types (struct), Dynamic Data Structures,
+#               Dynamic Memory, Functions, Recursion
+#
+# Builds a singly linked list entirely in mini-language using structs.
+# Each Node is a heap-allocated MiniObject with 'value' and 'next' fields,
+# directly modelling the pointer-based linked list data structure.
+
+struct Node { value, next }
+struct LinkedList { head, size }
+
+# -- construction --
+
+fun create_list() {
+    return new LinkedList(null, 0)
+}
+
+fun push_front(lst, val) {
+    let node = new Node(val, lst.head)
+    lst.head = node
+    lst.size = lst.size + 1
+}
+
+fun push_back(lst, val) {
+    let node = new Node(val, null)
+    if lst.head == null {
+        lst.head = node
+    } else {
+        let current = lst.head
+        while current.next != null {
+            current = current.next
+        }
+        current.next = node
+    }
+    lst.size = lst.size + 1
+}
+
+# -- traversal --
+
+fun to_string(lst) {
+    let result = ""
+    let current = lst.head
+    while current != null {
+        result = result + str(current.value) + " -> "
+        current = current.next
+    }
+    return result + "null"
+}
+
+# Recursive list sum (demonstrates recursion over a linked structure)
+fun sum_list(node) {
+    if node == null {
+        return 0
+    }
+    return node.value + sum_list(node.next)
+}
+
+# Recursive list length
+fun list_len(node) {
+    if node == null {
+        return 0
+    }
+    return 1 + list_len(node.next)
+}
+
+# -- test --
+
+let myList = create_list()
+push_back(myList, 10)
+push_back(myList, 20)
+push_back(myList, 30)
+push_front(myList, 5)
+
+print(to_string(myList))              # 5 -> 10 -> 20 -> 30 -> null
+print("size = " + str(myList.size))   # size = 4
+print("sum  = " + str(sum_list(myList.head)))   # sum  = 65
+print("len  = " + str(list_len(myList.head)))   # len  = 4
+
+# Build a list from a range and compute stats
+let numList = create_list()
+let i = 1
+while i <= 5 {
+    push_back(numList, i * i)
+    i = i + 1
+}
+print("squares: " + to_string(numList))  # 1 -> 4 -> 9 -> 16 -> 25 -> null

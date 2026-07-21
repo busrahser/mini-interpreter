@@ -1,0 +1,15 @@
+# Mini Interpreter has NO third-party runtime dependencies.
+# The lexer, parser, and interpreter are built entirely on the Python
+# standard library (dataclasses, enum, abc, typing).
+#
+# The dependency below is only needed if you want to run the test suite
+# with pytest instead of the built-in unittest runner:
+#
+#     pip install -r requirements.txt
+#     pytest tests/ -v
+#
+# Without it, tests still run fine with:
+#
+#     python -m unittest tests.test_interpreter -v
+
+pytest>=8.0

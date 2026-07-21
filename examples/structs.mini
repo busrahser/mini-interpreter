@@ -1,0 +1,104 @@
+# structs.mini
+# Demonstrates: User-defined Types, Abstraction & Encapsulation, Dynamic Memory
+#
+# Structs are user-defined named record types.  Each 'new' or constructor call
+# allocates a fresh MiniObject on the heap.  Methods are stored as function
+# fields, demonstrating object-style encapsulation.
+
+# --- Point: a simple 2D value type ---
+
+struct Point { x, y }
+
+fun point_distance(p1, p2) {
+    let dx = p2.x - p1.x
+    let dy = p2.y - p1.y
+    return sqrt(dx * dx + dy * dy)
+}
+
+fun point_to_str(p) {
+    return "(" + str(p.x) + ", " + str(p.y) + ")"
+}
+
+let origin = new Point(0, 0)
+let a      = new Point(3, 4)
+
+print(point_to_str(origin))              # (0, 0)
+print(point_to_str(a))                   # (3, 4)
+print("dist = " + str(point_distance(origin, a)))  # dist = 5
+
+# --- Stack: a struct-based stack (dynamic data structure) ---
+
+struct Stack { data, top }
+
+fun make_stack() {
+    return new Stack([], 0)
+}
+
+fun stack_push(s, val) {
+    append(s.data, val)
+    s.top = s.top + 1
+}
+
+fun stack_pop(s) {
+    if s.top == 0 {
+        throw "Stack underflow"
+    }
+    let val = s.data[s.top - 1]
+    s.data = filter(s.data, fun(x) { return true })  # copy
+    s.top = s.top - 1
+    return val
+}
+
+fun stack_peek(s) {
+    if s.top == 0 {
+        throw "Stack is empty"
+    }
+    return s.data[s.top - 1]
+}
+
+fun stack_is_empty(s) {
+    return s.top == 0
+}
+
+let stk = make_stack()
+stack_push(stk, 10)
+stack_push(stk, 20)
+stack_push(stk, 30)
+
+print("peek = " + str(stack_peek(stk)))        # peek = 30
+print("pop  = " + str(stack_pop(stk)))         # pop  = 30
+print("top  = " + str(stk.top))                # top  = 2
+print("empty? " + str(stack_is_empty(stk)))    # empty? false
+
+# --- BankAccount: encapsulation via helper functions ---
+
+struct BankAccount { owner, balance }
+
+fun deposit(account, amount) {
+    if amount <= 0 {
+        throw "Deposit amount must be positive"
+    }
+    account.balance = account.balance + amount
+}
+
+fun withdraw(account, amount) {
+    if amount > account.balance {
+        throw "Insufficient funds"
+    }
+    account.balance = account.balance - amount
+}
+
+fun account_str(account) {
+    return account.owner + ": $" + str(account.balance)
+}
+
+let acc = new BankAccount("Alice", 100)
+deposit(acc, 50)
+withdraw(acc, 30)
+print(account_str(acc))   # Alice: $120
+
+try {
+    withdraw(acc, 500)
+} catch(err) {
+    print("Error: " + err)   # Error: Insufficient funds
+}

@@ -1,0 +1,48 @@
+# closures.mini
+# Demonstrates: Higher-order Functions (elective), Closures, Scope
+#
+# make_adder returns an anonymous function that captures 'x' from its
+# defining scope.  This is a closure: the returned function "closes over"
+# the variable even after make_adder has returned.
+
+fun make_adder(x) {
+    return fun(y) { return x + y }
+}
+
+let add5  = make_adder(5)
+let add10 = make_adder(10)
+
+print(add5(3))     # => 8
+print(add10(7))    # => 17
+print(add5(add10(1)))  # => 16  (composition)
+
+# Higher-order functions: map, filter, reduce
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+let doubled = map(numbers, fun(x) { return x * 2 })
+print(doubled)    # [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+let evens = filter(numbers, fun(x) { return x % 2 == 0 })
+print(evens)      # [2, 4, 6, 8, 10]
+
+let total = reduce(numbers, fun(acc, x) { return acc + x }, 0)
+print("sum = " + str(total))   # sum = 55
+
+# Function stored in a variable and passed to map
+let square = fun(x) { return x * x }
+let squares = map([1, 2, 3, 4, 5], square)
+print(squares)    # [1, 4, 9, 16, 25]
+
+# Counter using closure — demonstrates mutable state in a closure
+fun make_counter() {
+    let count = 0
+    return fun() {
+        count = count + 1
+        return count
+    }
+}
+
+let counter = make_counter()
+print(counter())   # 1
+print(counter())   # 2
+print(counter())   # 3

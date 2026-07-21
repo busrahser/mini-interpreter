@@ -1,0 +1,113 @@
+# all_features.mini
+# Full integration demo — exercises every required and elective PL concept
+# in a single coherent program: a simple expression evaluator / calculator.
+
+# ── 1. User-defined Types (struct) ──────────────────────────────────────────
+struct Expr   { kind, left, right, value }   # AST node
+struct Result { ok, data }                   # discriminated result type
+
+fun make_num(v)      { return new Expr("num",  null, null, v) }
+fun make_add(l, r)   { return new Expr("add",  l,    r,    0) }
+fun make_mul(l, r)   { return new Expr("mul",  l,    r,    0) }
+fun make_neg(operand){ return new Expr("neg",  operand, null, 0) }
+
+fun ok(data)   { return new Result(true,  data) }
+fun err(msg)   { return new Result(false, msg)  }
+
+# ── 2. Recursion + Functions ─────────────────────────────────────────────────
+# evaluate() recurses over the Expr tree — each call is a new scope frame.
+fun evaluate(expr) {
+    if expr.kind == "num" {
+        return ok(expr.value)
+    }
+    if expr.kind == "neg" {
+        let r = evaluate(expr.left)
+        if not r.ok { return r }
+        return ok(0 - r.data)
+    }
+    if expr.kind == "add" {
+        let l = evaluate(expr.left)
+        let r = evaluate(expr.right)
+        if not l.ok { return l }
+        if not r.ok { return r }
+        return ok(l.data + r.data)
+    }
+    if expr.kind == "mul" {
+        let l = evaluate(expr.left)
+        let r = evaluate(expr.right)
+        if not l.ok { return l }
+        if not r.ok { return r }
+        return ok(l.data * r.data)
+    }
+    return err("Unknown expression kind: " + expr.kind)
+}
+
+# ── 3. Exception Handling ────────────────────────────────────────────────────
+fun safe_eval(expr) {
+    try {
+        let res = evaluate(expr)
+        if res.ok {
+            return res.data
+        }
+        throw res.data
+    } catch(e) {
+        print("Evaluation error: " + e)
+        return null
+    }
+}
+
+# ── 4. Scope & Closures ──────────────────────────────────────────────────────
+# build_pipeline returns a function that applies a list of transforms in sequence.
+fun build_pipeline(transforms) {
+    return fun(initial) {
+        return reduce(transforms, fun(acc, fn) { return fn(acc) }, initial)
+    }
+}
+
+# ── 5. Higher-order Functions ────────────────────────────────────────────────
+let double_it = fun(x) { return x * 2 }
+let add_ten   = fun(x) { return x + 10 }
+let negate    = fun(x) { return 0 - x }
+
+let pipeline = build_pipeline([double_it, add_ten, negate])
+
+# ── 6. Dynamic Data Structures (MiniList) ────────────────────────────────────
+let test_cases = [
+    make_num(5),
+    make_add(make_num(3), make_num(7)),
+    make_mul(make_num(4), make_add(make_num(2), make_num(3))),
+    make_neg(make_num(8)),
+]
+
+print("=== Expression Evaluator ===")
+forEach(test_cases, fun(expr) {
+    let val = safe_eval(expr)
+    if val != null {
+        print("result = " + str(val))
+    }
+})
+
+print("")
+print("=== Pipeline ===")
+let inputs = [1, 2, 3, 4, 5]
+let outputs = map(inputs, pipeline)
+print(outputs)  # each x → negate(double(x)+10)
+
+print("")
+print("=== Type checking ===")
+print(type(42))          # Number
+print(type("hello"))     # String
+print(type(true))        # Bool
+print(type(null))        # Null
+print(type([1, 2]))      # List
+print(type(make_num(1))) # Expr  (struct name is the type)
+
+print("")
+print("=== Scope demonstration ===")
+let x = 100
+fun show_scope() {
+    let x = 200       # local shadow
+    print("inside: " + str(x))   # 200
+}
+show_scope()
+print("outside: " + str(x))      # 100
