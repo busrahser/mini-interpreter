@@ -117,7 +117,7 @@ Requires Python 3.8 or later. No packages need to be installed to run the
 interpreter itself.
 
 ```bash
-git clone https://github.com/<your-username>/mini-interpreter.git
+git clone https://github.com/busrahser/mini-interpreter.git
 cd mini-interpreter
 ```
 
